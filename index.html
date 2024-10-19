@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea, input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+        button {
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .response {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        .status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rule Engine</h1>
+
+    <h2>Create Rule</h2>
+    <textarea id="createRuleInput" placeholder="Enter rule string here..."></textarea>
+    <button onclick="createRule()">Create Rule</button>
+    <div id="createRuleResult" class="response"></div>
+    <div id="createRuleStatus" class="status"></div>
+
+    <h2>Combine Rules</h2>
+    <textarea id="combineRulesInput" placeholder="Enter multiple rule strings here (one per line)"></textarea>
+    <button onclick="combineRules()">Combine Rules</button>
+    <div id="combineRulesResult" class="response"></div>
+    <div id="combineRulesStatus" class="status"></div>
+
+    <h2>Evaluate Rule</h2>
+    <textarea id="evaluateRuleInput" placeholder="Enter JSON representation of AST here..."></textarea>
+    <textarea id="evaluateDataInput" placeholder="Enter data JSON here..."></textarea>
+    <button onclick="evaluateRule()">Evaluate Rule</button>
+    <div id="evaluateResult" class="response"></div>
+    <div id="evaluateStatus" class="status"></div>
+
+    <script>
+        async function createRule() {
+            const ruleString = document.getElementById('createRuleInput').value;
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/create_rule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rule_string: ruleString }),
+                });
+                const status = `Status: ${response.status} ${response.statusText}`;
+                const result = await response.json();
+                document.getElementById('createRuleResult').innerText = JSON.stringify(result, null, 2);
+                document.getElementById('createRuleStatus').innerText = status;
+            } catch (error) {
+                document.getElementById('createRuleStatus').innerText = `Error: ${error.message}`;
+            }
+        }
+
+        async function combineRules() {
+            const ruleStrings = document.getElementById('combineRulesInput').value.split('\n').filter(rule => rule.trim());
+            try {
+                const response = await fetch('http://localhost:8080/api/combineRules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rules: ruleStrings }),
+                });
+                const status = `Status: ${response.status} ${response.statusText}`;
+                const result = await response.json();
+                document.getElementById('combineRulesResult').innerText = JSON.stringify(result, null, 2);
+                document.getElementById('combineRulesStatus').innerText = status;
+            } catch (error) {
+                document.getElementById('combineRulesStatus').innerText = `Error: ${error.message}`;
+            }
+        }
+
+        async function evaluateRule() {
+            const astJSON = document.getElementById('evaluateRuleInput').value;
+            const data = JSON.parse(document.getElementById('evaluateDataInput').value);
+            try {
+                const response = await fetch('http://localhost:8080/api/evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ast: astJSON, data: data }),
+                });
+                const status = `Status: ${response.status} ${response.statusText}`;
+                const result = await response.json();
+                document.getElementById('evaluateResult').innerText = JSON.stringify(result, null, 2);
+                document.getElementById('evaluateStatus').innerText = status;
+            } catch (error) {
+                document.getElementById('evaluateStatus').innerText = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
