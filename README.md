@@ -3,4 +3,4 @@ Directions to run
 2. RUN commands
     docker build -t my-go-app .
     docker run -d -p 8000:8000 --name go-server my-go-app
-3. Open browser visit http://http://localhost:8000/
+3. Open browser visit http://localhost:8000/
