@@ -4,30 +4,33 @@ import (
 	"y/models"
 )
 
-// CombineRules takes a list of rule strings and combines them into a single AST
+// CombineRules takes a list of rule strings and combines them into a balanced AST
 func CombineRules(ruleStrings []string) *models.Node {
-	var asts []*models.Node
-
-	// Convert each rule string into an AST
-	for _, ruleString := range ruleStrings {
-		ast := CreateRule(ruleString)
-		asts = append(asts, ast)
-	}
-
-	// Combine the ASTs into a single AST using "AND" as the root operator
-	if len(asts) == 0 {
+	if len(ruleStrings) == 0 {
 		return nil
 	}
 
-	combinedAST := asts[0]
-	for i := 1; i < len(asts); i++ {
-		combinedAST = &models.Node{
-			Type:  models.Operator,
-			Value: "AND", // Using AND as the combining operator
-			Left:  combinedAST,
-			Right: asts[i],
-		}
+	if len(ruleStrings) == 1 {
+		// Only one rule, convert it into an AST and return
+		res,_ := CreateRule(ruleStrings[0])
+		return res // Assuming CreateRule generates the AST for a single rule
 	}
+
+	// Divide the rule strings into two halves
+	mid := len(ruleStrings) / 2
+	leftAST := CombineRules(ruleStrings[:mid])
+	rightAST := CombineRules(ruleStrings[mid:])
+
+	// Combine the two halves with an "AND" operator
+	combinedAST := &models.Node{
+		Type:  models.Operator,
+		Value: "AND",
+		Left:  leftAST,
+		Right: rightAST,
+	}
+
+	// Print the resulting AST for debugging purposes
+	printAST(combinedAST, 0)
 
 	return combinedAST
 }

@@ -59,7 +59,7 @@
         async function createRule() {
             const ruleString = document.getElementById('createRuleInput').value;
             try {
-                const response = await fetch('http://localhost:8080/api/v1/create_rule', {
+                const response = await fetch('http://localhost:8000/api/v1/create_rule', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rule_string: ruleString }),
@@ -76,7 +76,7 @@
         async function combineRules() {
             const ruleStrings = document.getElementById('combineRulesInput').value.split('\n').filter(rule => rule.trim());
             try {
-                const response = await fetch('http://localhost:8080/api/combineRules', {
+                const response = await fetch('http://localhost:8000/api/combineRules', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rules: ruleStrings }),
@@ -94,7 +94,7 @@
             const astJSON = document.getElementById('evaluateRuleInput').value;
             const data = JSON.parse(document.getElementById('evaluateDataInput').value);
             try {
-                const response = await fetch('http://localhost:8080/api/evaluate', {
+                const response = await fetch('http://localhost:8000/api/evaluate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ast: astJSON, data: data }),
