@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"y/models"
 )
@@ -11,9 +12,28 @@ type RuleRequest struct {
 	RuleString string `json:"rule_string"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 // RuleResponse represents the structure of the response containing the AST
 type RuleResponse struct {
 	AST *models.Node `json:"ast"`
+}
+
+func isValidParentheses(ruleString string) bool {
+	count := 0
+	for _, char := range ruleString {
+		if char == '(' {
+			count++
+		} else if char == ')' {
+			count--
+		}
+		if count < 0 {
+			return false // More closing parnatheses
+		}
+	}
+	return count == 0
 }
 
 // CreateRuleHandler handles the POST request to create an AST from a rule string
@@ -36,8 +56,12 @@ func CreateRuleHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	fmt.Println(req)
 	// Create the AST from the rule string
+	if !isValidParentheses(req.RuleString) {
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "Unbalanced parentheses in rule string"})
+		return
+	}
 	ast := CreateRule(req.RuleString)
 
 	// Return the AST as a response
