@@ -42,14 +42,18 @@ The frontend interacts with the following backend API endpoints:
 
 ## Sample Input
 1. **Create Rule**
+   ```
     age>21 OR (salary<=13000 AND salary>=10000)
+   ```
 
-2. **Combine Rules**
+3. **Combine Rules**
+   ```
    age>21
    salary<=13000 AND salary>=10000
    department = Sales
 
-4. **Evaluate Rule**
+5. **Evaluate Rule**
+   ```
    Rule:
        age>21
        salary<=13000 AND salary>=10000
