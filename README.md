@@ -57,6 +57,9 @@ The frontend interacts with the following backend API endpoints:
    Rule:
        age>21
        salary<=13000 AND salary>=10000
+   ```
+   ```
    Details:
        age = 22
        salary = 12000
+   ```
