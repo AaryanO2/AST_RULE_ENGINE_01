@@ -38,8 +38,11 @@ func CombineRulesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Combine the rules into a single AST
-	combinedAST := CombineRules(req.RuleStrings)
-
+	combinedAST, err := CombineRules(req.RuleStrings)
+	if err != nil {
+		json.NewEncoder(w).Encode(ErrorResponse{Error: err.Error()})
+		return
+	}
 	// Return the combined AST as a response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(CombineRulesResponse{CombinedAST: combinedAST})

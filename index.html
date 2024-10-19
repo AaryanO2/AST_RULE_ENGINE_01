@@ -6,54 +6,109 @@
     <title>Rule Engine UI</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 20px;
+            background-color: #f5f5f5; /* Light grey background */
+            color: #333; /* Dark grey text */
+        }
+        h1, h2 {
+            color: #4A4A4A; /* Darker grey for headers */
+            text-align: left; /* Left-aligned headers */
+            margin-bottom: 10px; /* Space below headers */
+        }
+        section {
+            margin-bottom: 30px; /* Space between sections */
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff; /* White background for sections */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
         }
         textarea, input {
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 8px;
+            width: calc(100% - 24px); /* Full width minus padding */
+            height: 100px; /* Fixed height for text areas */
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 1px solid #ccc; /* Lighter border color */
+            border-radius: 4px;
+            resize: none; /* Prevent resizing */
+            background-color: #f9f9f9; /* Light background for inputs */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Inset shadow for depth */
         }
         button {
-            margin-bottom: 20px;
-            padding: 10px 15px;
+            padding: 12px 20px;
             font-size: 16px;
+            color: white;
+            background-color: #007BFF; /* Blue for buttons */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s; /* Smooth transition for background color */
+            width: 100%; /* Button width to full */
+            box-sizing: border-box; /* Include padding and border in width */
+        }
+        button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        button:active {
+            background-color: #004494; /* Even darker blue on click */
         }
         #result {
             margin-top: 20px;
         }
         .response {
-            border: 1px solid #ccc;
-            padding: 10px;
+            border: 1px solid #ccc; /* Lighter border for responses */
+            padding: 12px;
             margin-top: 10px;
+            background-color: #fff; /* White background for responses */
+            border-radius: 4px;
             white-space: pre-wrap;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
         }
         .status {
             font-weight: bold;
+            margin-top: 5px;
+            text-align: left; /* Left-aligned status messages */
+        }
+        .status.success {
+            color: #28a745; /* Green for success messages */
+        }
+        .status.error {
+            color: #dc3545; /* Red for error messages */
+        }
+        @media (max-width: 600px) {
+            button {
+                width: 100%; /* Full width for buttons on small screens */
+            }
         }
     </style>
 </head>
 <body>
     <h1>Rule Engine</h1>
 
-    <h2>Create Rule</h2>
-    <textarea id="createRuleInput" placeholder="Enter rule string here..."></textarea>
-    <button onclick="createRule()">Create Rule</button>
-    <div id="createRuleResult" class="response"></div>
-    <div id="createRuleStatus" class="status"></div>
+    <section>
+        <h2>Create Rule</h2>
+        <textarea id="createRuleInput" placeholder="Enter rule string..."></textarea>
+        <button onclick="createRule()">Create Rule</button>
+        <div id="createRuleResult" class="response"></div>
+        <div id="createRuleStatus" class="status"></div>
+    </section>
 
-    <h2>Combine Rules</h2>
-    <textarea id="combineRulesInput" placeholder="Enter multiple rule strings here (one per line)"></textarea>
-    <button onclick="combineRules()">Combine Rules</button>
-    <div id="combineRulesResult" class="response"></div>
-    <div id="combineRulesStatus" class="status"></div>
+    <section>
+        <h2>Combine Rules</h2>
+        <textarea id="combineRulesInput" placeholder="Enter multiple rule strings (one per line)..."></textarea>
+        <button onclick="combineRules()">Combine Rules</button>
+        <div id="combineRulesResult" class="response"></div>
+        <div id="combineRulesStatus" class="status"></div>
+    </section>
 
-    <h2>Evaluate Rule</h2>
-    <textarea id="evaluateRuleInput" placeholder="Enter JSON representation of AST here..."></textarea>
-    <textarea id="evaluateDataInput" placeholder="Enter data JSON here..."></textarea>
-    <button onclick="evaluateRule()">Evaluate Rule</button>
-    <div id="evaluateResult" class="response"></div>
-    <div id="evaluateStatus" class="status"></div>
+    <section>
+        <h2>Evaluate Rule</h2>
+        <textarea id="evaluateRuleInput" placeholder="Enter rule strings (one per line)..."></textarea>
+        <textarea id="evaluateDataInput" placeholder="Enter details (key=value format, one per line)..."></textarea>
+        <button onclick="evaluateRule()">Evaluate Rule</button>
+        <div id="evaluateResult" class="response"></div>
+        <div id="evaluateStatus" class="status"></div>
+    </section>
 
     <script>
         async function createRule() {
@@ -64,47 +119,72 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rule_string: ruleString }),
                 });
-                const status = `Status: ${response.status} ${response.statusText}`;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status} ${response.statusText}`);
+                }
+
                 const result = await response.json();
                 document.getElementById('createRuleResult').innerText = JSON.stringify(result, null, 2);
-                document.getElementById('createRuleStatus').innerText = status;
+                document.getElementById('createRuleStatus').innerText = 'Rule created successfully!';
+                document.getElementById('createRuleStatus').className = 'status success';
             } catch (error) {
                 document.getElementById('createRuleStatus').innerText = `Error: ${error.message}`;
+                document.getElementById('createRuleStatus').className = 'status error';
             }
         }
 
         async function combineRules() {
             const ruleStrings = document.getElementById('combineRulesInput').value.split('\n').filter(rule => rule.trim());
             try {
-                const response = await fetch('http://localhost:8000/api/combineRules', {
+                const response = await fetch('http://localhost:8000/api/v1/combine_rules', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rules: ruleStrings }),
+                    body: JSON.stringify({ rule_strings: ruleStrings }),
                 });
-                const status = `Status: ${response.status} ${response.statusText}`;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status} ${response.statusText}`);
+                }
+
                 const result = await response.json();
                 document.getElementById('combineRulesResult').innerText = JSON.stringify(result, null, 2);
-                document.getElementById('combineRulesStatus').innerText = status;
+                document.getElementById('combineRulesStatus').innerText = 'Rules combined successfully!';
+                document.getElementById('combineRulesStatus').className = 'status success';
             } catch (error) {
                 document.getElementById('combineRulesStatus').innerText = `Error: ${error.message}`;
+                document.getElementById('combineRulesStatus').className = 'status error';
             }
         }
 
         async function evaluateRule() {
-            const astJSON = document.getElementById('evaluateRuleInput').value;
-            const data = JSON.parse(document.getElementById('evaluateDataInput').value);
+            const ruleStrings = document.getElementById('evaluateRuleInput').value.split('\n').filter(rule => rule.trim());
+            const dataString = document.getElementById('evaluateDataInput').value;
+
+            const data = dataString.split('\n').reduce((acc, line) => {
+                const [key, value] = line.split('=').map(item => item.trim());
+                acc[key] = isNaN(value) ? value.replace(/"/g, '') : Number(value);
+                return acc;
+            }, {});
+
             try {
-                const response = await fetch('http://localhost:8000/api/evaluate', {
+                const response = await fetch('http://localhost:8000/api/evaluate', {                    
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ast: astJSON, data: data }),
+                    body: JSON.stringify({ rules: ruleStrings, data: data }),
                 });
-                const status = `Status: ${response.status} ${response.statusText}`;
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status} ${response.statusText}`);
+                }
+
                 const result = await response.json();
                 document.getElementById('evaluateResult').innerText = JSON.stringify(result, null, 2);
-                document.getElementById('evaluateStatus').innerText = status;
+                document.getElementById('evaluateStatus').innerText = 'Rule evaluated successfully!';
+                document.getElementById('evaluateStatus').className = 'status success';
             } catch (error) {
                 document.getElementById('evaluateStatus').innerText = `Error: ${error.message}`;
+                document.getElementById('evaluateStatus').className = 'status error';
             }
         }
     </script>

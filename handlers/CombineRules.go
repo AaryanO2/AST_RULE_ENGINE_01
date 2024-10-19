@@ -1,36 +1,26 @@
 package handlers
 
 import (
+	"fmt"
+	"strings"
 	"y/models"
 )
 
-// CombineRules takes a list of rule strings and combines them into a balanced AST
-func CombineRules(ruleStrings []string) *models.Node {
+// CombineRules takes a list of rule strings and combines them into a single rule string
+func CombineRules(ruleStrings []string) (*models.Node, error) {
 	if len(ruleStrings) == 0 {
-		return nil
+		return nil, nil // No rules to combine
 	}
 
-	if len(ruleStrings) == 1 {
-		// Only one rule, convert it into an AST and return
-		res,_ := CreateRule(ruleStrings[0])
-		return res // Assuming CreateRule generates the AST for a single rule
+	// Join all rule strings with " AND "
+	combinedRule := strings.Join(ruleStrings, " AND ")
+
+	// Create the AST from the combined rule string
+	ast, err := CreateRule(combinedRule)
+	if err != nil {
+		fmt.Printf("Error creating AST for combined rule: %s, Error: %s\n", combinedRule, err)
+		return nil, err // Return the error if CreateRule fails
 	}
 
-	// Divide the rule strings into two halves
-	mid := len(ruleStrings) / 2
-	leftAST := CombineRules(ruleStrings[:mid])
-	rightAST := CombineRules(ruleStrings[mid:])
-
-	// Combine the two halves with an "AND" operator
-	combinedAST := &models.Node{
-		Type:  models.Operator,
-		Value: "AND",
-		Left:  leftAST,
-		Right: rightAST,
-	}
-
-	// Print the resulting AST for debugging purposes
-	printAST(combinedAST, 0)
-
-	return combinedAST
+	return ast, nil
 }

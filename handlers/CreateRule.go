@@ -9,12 +9,12 @@ import (
 
 // parseRuleString splits the rule string into tokens using regular expressions.
 func parseRuleString(ruleString string) []string {
-	re := regexp.MustCompile(`[\w']+|[()=><!]`)
+	re := regexp.MustCompile(`[\w']+|[()=><!]+`)
 	tokens := re.FindAllString(ruleString, -1)
 	return tokens
 }
 
-// debugging
+// debugging function to print the AST
 func printAST(node *models.Node, level int) {
 	if node == nil {
 		return
@@ -35,7 +35,7 @@ func CreateRule(ruleString string) (*models.Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	printAST(ast, 0)
+	printAST(ast, 0) // Debugging: Print the generated AST
 	return ast, nil
 }
 
@@ -88,13 +88,15 @@ func convertTokensToAST(tokens []string, index int) (*models.Node, error) {
 		default:
 			// It's an operand, so attach it to the current node
 			condition := token
-			if index+2 < len(tokens) && (tokens[index+1] == ">" || tokens[index+1] == "<" || tokens[index+1] == "=" || tokens[index+1] == "!=") {
+			// Check for valid comparisons including new operators
+			if index+2 < len(tokens) && (tokens[index+1] == ">" || tokens[index+1] == "<" || tokens[index+1] == "=" || tokens[index+1] == "!=" || tokens[index+1] == ">=" || tokens[index+1] == "<=" || tokens[index+1] == "==") {
 				// Ensure valid comparison
 				condition += " " + tokens[index+1] + " " + tokens[index+2]
 				index += 2
-			} else if index+1 < len(tokens) && (tokens[index+1] == ">" || tokens[index+1] == "<" || tokens[index+1] == "=" || tokens[index+1] == "!=") {
+			} else if index+1 < len(tokens) && (tokens[index+1] == ">" || tokens[index+1] == "<" || tokens[index+1] == "=" || tokens[index+1] == "!=" || tokens[index+1] == ">=" || tokens[index+1] == "<=" || tokens[index+1] == "==") {
 				return nil, fmt.Errorf("missing operand after comparison operator %s", tokens[index+1])
 			}
+
 			operandNode := &models.Node{
 				Type:  models.Operand,
 				Value: condition,
@@ -106,6 +108,7 @@ func convertTokensToAST(tokens []string, index int) (*models.Node, error) {
 				if currentNode.Right == nil {
 					currentNode.Right = operandNode
 				} else {
+					// Attach to the left if already has a right child
 					currentNode.Left = operandNode
 				}
 			}
