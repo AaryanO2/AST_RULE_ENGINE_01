@@ -15,17 +15,17 @@ The frontend interacts with the following backend API endpoints:
 1. **Create Rule**
    - Endpoint: `POST /api/v1/create_rule`
    - Payload: `{ "rule_string": "your_rule_string" }`
-   - Response: JSON object with the status of rule creation.
+   - Response: JSON object with the status of rule creation and the JSON representing the AST tree.
 
 2. **Combine Rules**
    - Endpoint: `POST /api/v1/combine_rules`
    - Payload: `{ "rule_strings": ["rule1", "rule2"] }`
-   - Response: JSON object with the combined rule result.
+   - Response: JSON object with the combined rule result JSON representing the AST tree.
 
 3. **Evaluate Rule**
    - Endpoint: `POST /api/v1/evaluate`
    - Payload: `{ "rules": ["rule1", "rule2"], "data": { "key": "value" } }`
-   - Response: JSON object with the evaluation result.
+   - Response: JSON object with the evaluation result TRUE FALSE.
 
 ## Dependencies
 1. Docker
